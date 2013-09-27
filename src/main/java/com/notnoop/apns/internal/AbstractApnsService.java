@@ -56,10 +56,26 @@ abstract class AbstractApnsService implements ApnsService {
         push(notification);
         return notification;
     }
+    
+    @Override
+	public EnhancedApnsNotification push(String deviceToken, String payload, String externalId) throws NetworkIOException {
+        EnhancedApnsNotification notification =
+            new EnhancedApnsNotification(c.incrementAndGet(), EnhancedApnsNotification.MAXIMUM_EXPIRY, deviceToken, payload, externalId);
+        push(notification);
+        return notification;
+    }
 
     public EnhancedApnsNotification push(String deviceToken, String payload, Date expiry) throws NetworkIOException {
         EnhancedApnsNotification notification =
             new EnhancedApnsNotification(c.incrementAndGet(), (int)(expiry.getTime() / 1000), deviceToken, payload);
+        push(notification);
+        return notification;
+    }
+    
+    @Override
+	public EnhancedApnsNotification push(String deviceToken, String payload, Date expiry, String externalId) throws NetworkIOException {
+        EnhancedApnsNotification notification =
+            new EnhancedApnsNotification(c.incrementAndGet(), (int)(expiry.getTime() / 1000), deviceToken, payload, externalId);
         push(notification);
         return notification;
     }
@@ -70,6 +86,14 @@ abstract class AbstractApnsService implements ApnsService {
         push(notification);
         return notification;
     }
+    
+    @Override
+	public EnhancedApnsNotification push(byte[] deviceToken, byte[] payload, String externalId) throws NetworkIOException {
+        EnhancedApnsNotification notification =
+            new EnhancedApnsNotification(c.incrementAndGet(), EnhancedApnsNotification.MAXIMUM_EXPIRY, deviceToken, payload, externalId);
+        push(notification);
+        return notification;
+    }
 
     public EnhancedApnsNotification push(byte[] deviceToken, byte[] payload, int expiry) throws NetworkIOException {
         EnhancedApnsNotification notification =
@@ -77,8 +101,33 @@ abstract class AbstractApnsService implements ApnsService {
         push(notification);
         return notification;
     }
+    
+    @Override
+	public EnhancedApnsNotification push(byte[] deviceToken, byte[] payload, int expiry, String externalId) throws NetworkIOException {
+        EnhancedApnsNotification notification =
+            new EnhancedApnsNotification(c.incrementAndGet(), expiry, deviceToken, payload, externalId);
+        push(notification);
+        return notification;
+    }
 
     public Collection<EnhancedApnsNotification> push(Collection<String> deviceTokens, String payload) throws NetworkIOException {
+        byte[] messageBytes = Utilities.toUTF8Bytes(payload);
+        List<EnhancedApnsNotification> notifications = new ArrayList<EnhancedApnsNotification>(deviceTokens.size());
+        for (String deviceToken : deviceTokens) {
+            byte[] dtbytes = Utilities.decodeHex(deviceToken);
+            EnhancedApnsNotification notification =
+                new EnhancedApnsNotification(c.incrementAndGet(), EnhancedApnsNotification.MAXIMUM_EXPIRY, dtbytes, messageBytes);
+            notifications.add(notification);
+            push(notification);
+        }
+        return notifications;
+    }
+    
+    /** 
+     * Simple scenario when one externalId is per all deviceTokens
+     */
+    @Override
+	public Collection<EnhancedApnsNotification> push(Collection<String> deviceTokens, String payload, String externalId) throws NetworkIOException {
         byte[] messageBytes = Utilities.toUTF8Bytes(payload);
         List<EnhancedApnsNotification> notifications = new ArrayList<EnhancedApnsNotification>(deviceTokens.size());
         for (String deviceToken : deviceTokens) {
@@ -120,6 +169,44 @@ abstract class AbstractApnsService implements ApnsService {
         for (byte[] deviceToken : deviceTokens) {
             EnhancedApnsNotification notification =
                 new EnhancedApnsNotification(c.incrementAndGet(), expiry, deviceToken, payload);
+            notifications.add(notification);
+            push(notification);
+        }
+        return notifications;
+    }
+    
+    @Override
+	public Collection<EnhancedApnsNotification> push(Collection<String> deviceTokens, String payload, Date expiry, String externalId) throws NetworkIOException {
+        byte[] messageBytes = Utilities.toUTF8Bytes(payload);
+        List<EnhancedApnsNotification> notifications = new ArrayList<EnhancedApnsNotification>(deviceTokens.size());
+        for (String deviceToken : deviceTokens) {
+            byte[] dtbytes = Utilities.decodeHex(deviceToken);
+            EnhancedApnsNotification notification =
+                new EnhancedApnsNotification(c.incrementAndGet(), (int)(expiry.getTime() / 1000), dtbytes, messageBytes, externalId);
+            notifications.add(notification);
+            push(notification);
+        }
+        return notifications;
+    }
+
+    @Override
+	public Collection<EnhancedApnsNotification> push(Collection<byte[]> deviceTokens, byte[] payload, String externalId) throws NetworkIOException {
+        List<EnhancedApnsNotification> notifications = new ArrayList<EnhancedApnsNotification>(deviceTokens.size());
+        for (byte[] deviceToken : deviceTokens) {
+            EnhancedApnsNotification notification =
+                new EnhancedApnsNotification(c.incrementAndGet(), EnhancedApnsNotification.MAXIMUM_EXPIRY, deviceToken, payload, externalId);
+            notifications.add(notification);
+            push(notification);
+        }
+        return notifications;
+    }
+
+    @Override
+	public Collection<EnhancedApnsNotification> push(Collection<byte[]> deviceTokens, byte[] payload, int expiry, String externalId) throws NetworkIOException {
+        List<EnhancedApnsNotification> notifications = new ArrayList<EnhancedApnsNotification>(deviceTokens.size());
+        for (byte[] deviceToken : deviceTokens) {
+            EnhancedApnsNotification notification =
+                new EnhancedApnsNotification(c.incrementAndGet(), expiry, deviceToken, payload, externalId);
             notifications.add(notification);
             push(notification);
         }

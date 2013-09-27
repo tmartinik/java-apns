@@ -238,12 +238,11 @@ public class ApnsConnectionImpl implements ApnsConnection {
         sendMessage(m, false);
     }
 
-    public synchronized void sendMessage(ApnsNotification m, boolean fromBuffer) throws NetworkIOException {
+    private synchronized void sendMessage(ApnsNotification m, boolean fromBuffer) throws NetworkIOException {
 
-        int attempts = 0;
         while (true) {
             try {
-                attempts++;
+                m.incrementAttempts();
                 Socket socket = socket();
                 socket.getOutputStream().write(m.marshall());
                 socket.getOutputStream().flush();
@@ -252,14 +251,14 @@ public class ApnsConnectionImpl implements ApnsConnection {
                 delegate.messageSent(m, fromBuffer);
 
                 logger.debug("Message \"{}\" sent", m);
-
-                attempts = 0;
+                //Move it to some new thread
                 drainBuffer();
                 break;
             } catch (Exception e) {
                 Utilities.close(socket);
                 socket = null;
-                if (attempts >= RETRIES) {
+                int attempts = m.getAttempts();
+				if (attempts >= RETRIES) {
                     logger.error("Couldn't send message after " + RETRIES + " retries." + m, e);
                     delegate.messageSendFailed(m, e);
                     Utilities.wrapAndThrowAsRuntimeException(e);

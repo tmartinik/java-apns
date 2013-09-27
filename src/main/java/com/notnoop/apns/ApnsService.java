@@ -168,5 +168,29 @@ public interface ApnsService {
      *      or the service cannot send notifications for now
      */
     void testConnection() throws NetworkIOException;
+
+	public abstract Collection<EnhancedApnsNotification> push(Collection<byte[]> deviceTokens, byte[] payload, int expiry,
+			String externalId) throws NetworkIOException;
+
+	public abstract Collection<EnhancedApnsNotification> push(Collection<byte[]> deviceTokens, byte[] payload, String externalId)
+			throws NetworkIOException;
+
+	public abstract Collection<EnhancedApnsNotification> push(Collection<String> deviceTokens, String payload, Date expiry,
+			String externalId) throws NetworkIOException;
+
+	public abstract Collection<EnhancedApnsNotification> push(Collection<String> deviceTokens, String payload, String externalId)
+			throws NetworkIOException;
+
+	public abstract EnhancedApnsNotification push(byte[] deviceToken, byte[] payload, int expiry,
+			String externalId) throws NetworkIOException;
+
+	public abstract EnhancedApnsNotification push(byte[] deviceToken, byte[] payload, String externalId)
+			throws NetworkIOException;
+
+	public abstract EnhancedApnsNotification push(String deviceToken, String payload, Date expiry,
+			String externalId) throws NetworkIOException;
+
+	public abstract EnhancedApnsNotification push(String deviceToken, String payload, String externalId)
+			throws NetworkIOException;
     
 }

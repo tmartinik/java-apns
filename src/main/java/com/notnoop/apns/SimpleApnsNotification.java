@@ -43,6 +43,7 @@ public class SimpleApnsNotification implements ApnsNotification {
     private final static byte COMMAND = 0;
     private final byte[] deviceToken;
     private final byte[] payload;
+    private int attempts = 0;
 
     /**
      * Constructs an instance of {@code ApnsNotification}.
@@ -85,6 +86,7 @@ public class SimpleApnsNotification implements ApnsNotification {
     }
 
     private byte[] marshall = null;
+	
     /**
      * Returns the binary representation of the message as expected by the
      * APNS server.
@@ -143,4 +145,19 @@ public class SimpleApnsNotification implements ApnsNotification {
         } catch (Exception _) {}        
         return "Message(Token="+Utilities.encodeHex(deviceToken)+"; Payload="+payloadString+")";
     }
+
+	@Override
+	public String getExternalIdentifier() {
+		return null;
+	}
+
+	@Override
+	public int getAttempts() {
+		return attempts ;
+	}
+
+	@Override
+	public int incrementAttempts() {
+		return ++attempts;
+	}
 }

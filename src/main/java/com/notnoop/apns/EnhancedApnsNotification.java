@@ -46,6 +46,9 @@ public class EnhancedApnsNotification implements ApnsNotification {
     private final int expiry;
     private final byte[] deviceToken;
     private final byte[] payload;
+    private final String externalIdentifier;
+    private int attempts;
+    
 
     public static int INCREMENT_ID() {
         return ++nextId;
@@ -72,10 +75,25 @@ public class EnhancedApnsNotification implements ApnsNotification {
     public EnhancedApnsNotification(
             int identifier, int expiryTime,
             String dtoken, String payload) {
+     this(identifier, expiryTime, dtoken, payload, null);
+    }
+    
+    /**
+     * Constructs an instance of {@code ApnsNotification}.
+     *
+     * The message encodes the payload with a {@code UTF-8} encoding.
+     *
+     * @param dtoken    The Hex of the device token of the destination phone
+     * @param payload   The payload message to be sent
+     */
+    public EnhancedApnsNotification(
+            int identifier, int expiryTime,
+            String dtoken, String payload, String externalIdentifier) {
         this.identifier = identifier;
         this.expiry = expiryTime;
         this.deviceToken = Utilities.decodeHex(dtoken);
         this.payload = Utilities.toUTF8Bytes(payload);
+        this.externalIdentifier = externalIdentifier;
     }
 
     /**
@@ -87,10 +105,23 @@ public class EnhancedApnsNotification implements ApnsNotification {
     public EnhancedApnsNotification(
             int identifier, int expiryTime,
             byte[] dtoken, byte[] payload) {
+        this(identifier, expiryTime, dtoken, payload, null);
+    }
+    
+    /**
+     * Constructs an instance of {@code ApnsNotification}.
+     *
+     * @param dtoken    The binary representation of the destination device token
+     * @param payload   The binary representation of the payload to be sent
+     */
+    public EnhancedApnsNotification(
+            int identifier, int expiryTime,
+            byte[] dtoken, byte[] payload, String externalIdentifier) {
         this.identifier = identifier;
         this.expiry = expiryTime;
         this.deviceToken = Utilities.copyOf(dtoken);
         this.payload = Utilities.copyOf(payload);
+        this.externalIdentifier = externalIdentifier;
     }
 
     /**
@@ -172,6 +203,21 @@ public class EnhancedApnsNotification implements ApnsNotification {
         try {
             payloadString = new String(payload, "UTF-8");
         } catch (Exception _) {}        
-        return "Message(Id="+identifier+"; Token="+Utilities.encodeHex(deviceToken)+"; Payload="+payloadString+")";
+        return "Message(Id="+identifier+";ExternalId:"+externalIdentifier+"; Token="+Utilities.encodeHex(deviceToken)+"; Payload="+payloadString+")";
     }
+
+	@Override
+	public String getExternalIdentifier() {
+		return externalIdentifier;
+	}
+	
+	@Override
+	public int getAttempts() {
+		return attempts ;
+	}
+
+	@Override
+	public int incrementAttempts() {
+		return ++attempts;
+	}
 }
